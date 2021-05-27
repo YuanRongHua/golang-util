@@ -62,7 +62,10 @@ func InitSnowFlakeWorker(workerId int64)(err error){
 	return err
 }
 
-// 生产ID
+// 生产ID,前置条件为初始化节点实例
 func SnowFlakeId() int64 {
+	if currentNode == nil{
+		panic("Please execute the method initSnowFlakeWorker first")
+	}
 	return currentNode.getId()
 }
