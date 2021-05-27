@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var currentNode *Worker
+var currentNode *worker
 
 const (
 	workerBits  uint8 = 10
@@ -18,26 +18,26 @@ const (
 	startTime   int64 = 1525705533000 // 如果在程序跑了一段时间修改了epoch这个值 可能会导致生成相同的ID
 )
 
-type Worker struct {
+type worker struct {
 	mu        sync.Mutex
 	timestamp int64
 	workerId  int64
 	number    int64
 }
 
-func NewWorker(workerId int64) (*Worker, error) {
+func newWorker(workerId int64) (*worker, error) {
 	if workerId < 0 || workerId > workerMax {
 		return nil, errors.New("Worker ID excess of quantity")
 	}
 	// 生成一个新节点
-	return &Worker{
+	return &worker{
 		timestamp: 0,
 		workerId:  workerId,
 		number:    0,
 	}, nil
 }
 
-func (w *Worker) GetId() int64 {
+func (w *worker) getId() int64 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	now := time.Now().UnixNano() / 1e6
@@ -56,15 +56,13 @@ func (w *Worker) GetId() int64 {
 	return ID
 }
 
-func InitWorker(workerId int64){
-	// 生成节点实例
-	node, err := NewWorker(workerId)
-	if err != nil {
-		panic(err)
-	}
-	currentNode = node
+// 初始化节点实例
+func InitSnowFlakeWorker(workerId int64)(err error){
+	currentNode, err = newWorker(workerId)
+	return err
 }
 
-func GeneraatorId() int64 {
-	return currentNode.GetId()
+// 生产ID
+func SnowFlakeId() int64 {
+	return currentNode.getId()
 }
